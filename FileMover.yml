@@ -1,0 +1,46 @@
+trigger:
+- none
+
+stages:
+- stage: CopyFileFromDevCogApp
+  jobs:
+  - deployment: CopyFile
+    environment: 'testAppDev'  # This is where the file exists
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: CopyFiles@2
+            inputs:
+              SourceFolder: 'C:\Downloads'  # source of the file
+              Contents: '**/*'  # this will grab everything in the downloads directory
+              TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: 'drop'
+              publishLocation: 'Container'
+
+- stage: DeployToUatCogApp
+  dependsOn: CopyFileFromServerA
+  condition: succeeded()
+  jobs:
+  - deployment: DeployArtifact
+    environment: 'testAppUat'  # Define your destination server deployment group
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'drop'
+              downloadPath: '$(System.ArtifactsDirectory)'
+
+          - task: CopyFiles@2
+            inputs:
+              SourceFolder: '$(System.ArtifactsDirectory)\drop'
+              Contents: '**/*'  # copy all artifacts
+              TargetFolder: 'C:\Uploads'  # this is the target folder on the destination server
