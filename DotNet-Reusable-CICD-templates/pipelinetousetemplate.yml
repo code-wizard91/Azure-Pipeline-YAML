@@ -1,0 +1,26 @@
+trigger:
+- develop
+
+variables:
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+stages:
+# Development deployment
+- template: templates/azure-pipelines-template.yml
+  parameters:
+    environment: 'dev'
+    subscriptionName: 'YOURPIPELINECONNECTIONNAME'
+    yourFunctionName: 'YOURFUNCTIONAPPNAME'
+
+
+# Production deployment
+# - template: templates/azure-pipelines-template.yml
+#   parameters:
+#     environment: 'prod'
+#     subscriptionName: 'CATPRODSUB01'
+#     uploadFunctionName: 'prodbasilapp1'
+#     queueProcessorFunctionName: 'prodbasilapp2'
+#     resultFunctionName: 'prodbasilapp3'
+#     statusFunctionName: 'prodbasilapp4'
+#     deadletterProcessorFunctionName: 'prodbasilapp5' 
